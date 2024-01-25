@@ -1,0 +1,19 @@
+<?php
+/**
+ * Copyright (c) VCT. All rights reserved
+ */
+declare(strict_types=1);
+
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Escaper $escaper */
+/** @var Template $block */
+?>
+<div class="vct-modules">
+    <?php foreach ($block->getData('logo_attributes') as $logo): ?>
+        <a href="<?= $escaper->escapeUrl($logo['href']) ?>" target="_blank">
+            <img src="<?= $escaper->escapeHtmlAttr($logo['src']) ?>" />
+        </a>
+    <?php endforeach ?>
+</div>

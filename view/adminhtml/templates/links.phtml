@@ -1,0 +1,38 @@
+<?php
+/**
+ * Copyright (c) VCT. All rights reserved
+ */
+declare(strict_types=1);
+
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Escaper $escaper */
+/** @var Template $block */
+$supportInfo = $block->getData('support_info');
+$supportHref = sprintf('mailto:vct.vendor@gmail.com?subject=Support&body=%s', urlencode(implode(' | ', $supportInfo)));
+?>
+<div class="vct-header">
+    <div class="vct-links">
+        <a href="https://commercemarketplace.adobe.com/partner/VCT#partner.products.info" target="_blank">
+            <img src="https://raw.githubusercontent.com/vct-vendor/vct-vendor.github.io/master/static/img/logo.svg" />
+        </a>
+        <a href="https://vct-vendor.github.io" target="_blank">
+            <?= $escaper->escapeHtml(__('Docs')->render()) ?>
+        </a>
+        <a href="https://vct-vendor.github.io/faq" target="_blank">
+            <?= $escaper->escapeHtml(__('FAQ')->render()) ?>
+        </a>
+        <a href="<?= $escaper->escapeUrl($supportHref) ?>" target="_blank">
+            <?= $escaper->escapeHtml(__('Support')->render()) ?>
+        </a>
+        <a href="mailto:vct.vendor@gmail.com" target="_blank" class="feature-request">
+            <?= $escaper->escapeHtml(__('Feature Request')->render()) ?>
+        </a>
+    </div>
+    <div class="vct-support-info">
+        <?php foreach ($supportInfo as $info): ?>
+            <span><?= $escaper->escapeHtml($info) ?></span>
+        <?php endforeach; ?>
+    </div>
+</div>

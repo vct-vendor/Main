@@ -1,0 +1,17 @@
+// /**
+//  * Copyright (c) VCT. All rights reserved
+//  */
+/* phpcs:disable Magento2.Less.AvoidId.IdSelectorUsage */
+#menu-vct-main-menu > a:before {
+    background-image: url(https://raw.githubusercontent.com/vct-vendor/vct-vendor.github.io/master/static/img/logo.svg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 54px 54px;
+    content: '';
+    filter: grayscale(100%);
+}
+
+#menu-vct-main-menu > a:hover:before,
+#menu-vct-main-menu._show > a:before {
+    filter: none;
+}

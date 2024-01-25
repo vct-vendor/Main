@@ -1,0 +1,29 @@
+{
+    "name": "vct/main",
+    "version": "1.0.0",
+    "type": "magento2-module",
+    "description": "VCT Shared Package",
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "VCT",
+            "email": "vct.vendor@gmail.com",
+            "homepage": "https://vct-vendor.github.io",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "vct.vendor@gmail.com",
+        "docs": "https://vct-vendor.github.io",
+        "issues": "https://vct-vendor.github.io/faq#issues"
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Vct\\Main\\": ""
+        }
+    }
+}
