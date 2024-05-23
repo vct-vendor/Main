@@ -1,6 +1,6 @@
 {
     "name": "vct/main",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "magento2-module",
     "description": "VCT Shared Package",
     "license": "OSL-3.0",

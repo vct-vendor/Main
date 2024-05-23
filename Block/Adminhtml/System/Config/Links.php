@@ -33,11 +33,6 @@ class Links extends Fieldset
     private ProductMetadataInterface $productMetadata;
 
     /**
-     * @var Shell
-     */
-    private Shell $shell;
-
-    /**
      * @var File
      */
     private File $file;
@@ -121,13 +116,11 @@ class Links extends Fieldset
     {
         $packageName = $this->getPackageName();
         $packageVersion = $this->getPackageVersion($packageName);
-        preg_match('/Composer version (\S+)/', $this->shell->execute('composer', ['--version']), $composerVersion);
 
         return [
             'module' => sprintf('%s:%s', $packageName, $packageVersion),
             'magento' => sprintf('%s %s', $this->productMetadata->getEdition(), $this->productMetadata->getVersion()),
             'php' => sprintf('PHP %s', phpversion()),
-            'composer' => $composerVersion[1] ? sprintf('Composer %s', $composerVersion[1]) : '',
         ];
     }
 
