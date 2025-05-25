@@ -6,11 +6,14 @@ declare(strict_types=1);
 
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
+use Vct\Main\Block\Adminhtml\System\Config\Links;
 
 /** @var Escaper $escaper */
 /** @var Template $block */
-$supportInfo = $block->getData('support_info');
-$supportHref = sprintf('mailto:vct.vendor@gmail.com?subject=Support&body=%s', urlencode(implode(' | ', $supportInfo)));
+$email = 'mailto:vct.vendor@gmail.com';
+$supportInfos = $block->getData(Links::SUPPORT_INFO);
+$supportParams = urlencode(implode(' | ', $supportInfos));
+$supportUrl = sprintf('%s?subject=Support&body=%s', $email, $supportParams);
 ?>
 <div class="vct-header">
     <div class="vct-links">
@@ -23,16 +26,17 @@ $supportHref = sprintf('mailto:vct.vendor@gmail.com?subject=Support&body=%s', ur
         <a href="https://vct-vendor.github.io/faq" target="_blank">
             <?= $escaper->escapeHtml(__('FAQ')->render()) ?>
         </a>
-        <a href="<?= $escaper->escapeUrl($supportHref) ?>" target="_blank">
+        <a href="<?= $escaper->escapeUrl($supportUrl) ?>" target="_blank">
             <?= $escaper->escapeHtml(__('Support')->render()) ?>
         </a>
-        <a href="mailto:vct.vendor@gmail.com" target="_blank" class="feature-request">
+        <a href="<?= $escaper->escapeUrl($email) ?>" target="_blank" class='feature-request'>
             <?= $escaper->escapeHtml(__('Feature Request')->render()) ?>
         </a>
     </div>
+
     <div class="vct-support-info">
-        <?php foreach ($supportInfo as $info): ?>
-            <span><?= $escaper->escapeHtml($info) ?></span>
-        <?php endforeach; ?>
+        <?php foreach ($supportInfos as $supportInfo): ?>
+            <span><?= $escaper->escapeHtml($supportInfo) ?></span>
+        <?php endforeach ?>
     </div>
 </div>

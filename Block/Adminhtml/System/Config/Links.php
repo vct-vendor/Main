@@ -17,25 +17,23 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
-use Magento\Framework\Shell;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Helper\Js;
 
 /**
- * @copyright Copyright (c) VCT
+ * @copyright Copyright (c) VCT. All rights reserved
  * @link https://vct-vendor.github.io
+ * @phpcs:ignoreFile Magento2.Annotation.MethodAnnotationStructure.MethodAnnotation
  */
 class Links extends Fieldset
 {
+    public const SUPPORT_INFO = 'support_info';
+    private const LINKS_TEMPLATE = 'Vct_Main::links.phtml';
+
     /**
      * @var ProductMetadataInterface
      */
     private ProductMetadataInterface $productMetadata;
-
-    /**
-     * @var Shell
-     */
-    private Shell $shell;
 
     /**
      * @var File
@@ -62,7 +60,6 @@ class Links extends Fieldset
      * @param Session $authSession
      * @param Js $jsHelper
      * @param ProductMetadataInterface $productMetadata
-     * @param Shell $shell
      * @param File $file
      * @param JsonSerializer $jsonSerializer
      * @param DirectoryList $directoryList
@@ -73,7 +70,6 @@ class Links extends Fieldset
         Session $authSession,
         Js $jsHelper,
         ProductMetadataInterface $productMetadata,
-        Shell $shell,
         File $file,
         JsonSerializer $jsonSerializer,
         DirectoryList $directoryList,
@@ -81,7 +77,6 @@ class Links extends Fieldset
     ) {
         parent::__construct($context, $authSession, $jsHelper);
         $this->productMetadata = $productMetadata;
-        $this->shell = $shell;
         $this->file = $file;
         $this->jsonSerializer = $jsonSerializer;
         $this->directoryList = $directoryList;
@@ -89,8 +84,6 @@ class Links extends Fieldset
     }
 
     /**
-     * Add template to header comment
-     *
      * @param AbstractElement $element
      * @return string
      * @throws LocalizedException
@@ -98,65 +91,61 @@ class Links extends Fieldset
      */
     protected function _getHeaderCommentHtml($element): string
     {
-        if ($element->getComment()) {
+        if ($element->getData('comment')) {
             return parent::_getHeaderCommentHtml($element);
         }
 
-        $html = $this->getLayout()
-            ->createBlock(Template::class)
-            ->setData('support_info', $this->getSupportInfo())
-            ->setTemplate('Vct_Main::links.phtml')
-            ->toHtml();
+        /** @var Template $block */
+        $block = $this->getLayout()->createBlock(Template::class);
+        $supportInfos = $this->getSupportInfos();
+        $html = $block->setTemplate(self::LINKS_TEMPLATE)->setData(self::SUPPORT_INFO, $supportInfos)->toHtml();
 
         return sprintf('%s%s', $html, parent::_getHeaderCommentHtml($element));
     }
 
     /**
-     * Get information for support
-     *
      * @return array
      * @throws LocalizedException
      */
-    private function getSupportInfo(): array
+    private function getSupportInfos(): array
     {
         $packageName = $this->getPackageName();
         $packageVersion = $this->getPackageVersion($packageName);
-        preg_match('/Composer version (\S+)/', $this->shell->execute('composer', ['--version']), $composerVersion);
+        $magentoEdition = $this->productMetadata->getEdition();
+        $magentoVersion = $this->productMetadata->getVersion();
 
         return [
             'module' => sprintf('%s:%s', $packageName, $packageVersion),
-            'magento' => sprintf('%s %s', $this->productMetadata->getEdition(), $this->productMetadata->getVersion()),
+            'magento' => sprintf('%s %s', $magentoEdition, $magentoVersion),
             'php' => sprintf('PHP %s', phpversion()),
-            'composer' => $composerVersion[1] ? sprintf('Composer %s', $composerVersion[1]) : '',
         ];
     }
 
     /**
-     * Get package name
-     *
      * @return string
      */
     private function getPackageName(): string
     {
-        preg_match('/\/section\/([^\/]+)\//', $this->httpRequest->getPathInfo(), $moduleUrlPath);
+        $moduleConfigUrl = $this->httpRequest->getPathInfo();
+        preg_match('/section\/(vct_[^\/]+)/', $moduleConfigUrl, $moduleName);
 
-        return isset($moduleUrlPath[1]) ? str_replace('_', '/', $moduleUrlPath[1]) : 'N/A';
+        return isset($moduleName[1]) ? str_replace('_', '/', $moduleName[1]) : 'N/A';
     }
 
     /**
-     * Get package version
-     *
      * @param string $packageName
      * @return string
      * @throws FileSystemException
      */
     private function getPackageVersion(string $packageName): string
     {
-        $composerLockPath = sprintf('%s/composer.lock', $this->directoryList->getRoot());
-        $composerLock = $this->file->fileGetContents($composerLockPath);
-        $composerLockData = $this->jsonSerializer->unserialize($composerLock);
+        $packagePath = $this->directoryList->getRoot();
+        $composerLockPath = sprintf('%s/composer.lock', $packagePath);
+        $composerLockContent = $this->file->fileGetContents($composerLockPath);
+        $composerLockData = $this->jsonSerializer->unserialize($composerLockContent);
+        $packages = $composerLockData['packages'];
 
-        foreach ($composerLockData['packages'] as $package) {
+        foreach ($packages as $package) {
             if ($package['name'] === $packageName) {
                 return $package['version'];
             }

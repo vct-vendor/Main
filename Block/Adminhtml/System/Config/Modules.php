@@ -18,20 +18,24 @@ use Magento\Framework\View\Helper\Js;
 /**
  * @copyright Copyright (c) VCT
  * @link https://vct-vendor.github.io
+ * @phpcs:ignoreFile Magento2.Annotation.MethodAnnotationStructure.MethodAnnotation
  */
 class Modules extends Fieldset
 {
+    public const LOGO_URL = 'logo_url';
+    public const MODULE_URL = 'module_url';
+    public const MODULES_DATA = 'modules_data';
+    private const LOGO_URL_FORMAT = 'https://raw.githubusercontent.com/vct-vendor/vct-vendor.github.io/master/static/img/docs/%s.svg'; /* phpcs:ignore Generic.Files.LineLength.TooLong */
+    private const MODULE_URL_FORMAT = 'https://marketplace.magento.com/%s.html#maincontent';
+    private const MODULES_TEMPLATE = 'Vct_Main::modules.phtml';
     private const VCT_MODULES = [
-        'Vct_ChangeSkuDynamically',
-        'Vct_SimpleProductUrl',
-        'Vct_ProductInfoSwitcher',
-        'Vct_AlsoBought',
-        'Vct_PriceDiff',
-        'Vct_PlaceOrderSidebar',
+        'vct_changeskudynamically',
+        'vct_simpleproducturl',
+        'vct_productinfoswitcher',
+        'vct_alsobought',
+        'vct_pricediff',
+        'vct_placeordersidebar',
     ];
-    /* phpcs:ignore Generic.Files.LineLength.TooLong */
-    private const LOGO_URL_FORMAT = "https://raw.githubusercontent.com/vct-vendor/vct-vendor.github.io/master/static/img/docs/%s.svg";
-    private const MODULE_URL_FORMAT = "https://marketplace.magento.com/%s.html#maincontent";
 
     /**
      * @var FullModuleList
@@ -51,8 +55,6 @@ class Modules extends Fieldset
     }
 
     /**
-     * Add template to header comment
-     *
      * @param AbstractElement $element
      * @return string
      * @throws LocalizedException
@@ -60,45 +62,42 @@ class Modules extends Fieldset
      */
     protected function _getHeaderCommentHtml($element): string
     {
-        if ($element->getComment()) {
+        if ($element->getData('comment')) {
             return parent::_getHeaderCommentHtml($element);
         }
 
-        $html = $this->getLayout()
-            ->createBlock(Template::class)
-            ->setData('logo_attributes', $this->getLogoAttributes())
-            ->setTemplate('Vct_Main::modules.phtml')
-            ->toHtml();
+        /** @var Template $block */
+        $block = $this->getLayout()->createBlock(Template::class);
+        $modulesData = $this->getModulesData();
+        $html = $block->setTemplate(self::MODULES_TEMPLATE)->setData(self::MODULES_DATA, $modulesData)->toHtml();
 
         return sprintf('%s%s', $html, parent::_getHeaderCommentHtml($element));
     }
 
     /**
-     * Get missing module names
-     *
      * @return array
      */
     private function getMissingModuleNames(): array
     {
-        return array_diff(self::VCT_MODULES, $this->fullModuleList->getNames());
+        $moduleNameList = $this->fullModuleList->getNames();
+
+        return array_diff(self::VCT_MODULES, array_map('strtolower', $moduleNameList));
     }
 
     /**
-     * Get logo attributes
-     *
      * @return array
      */
-    private function getLogoAttributes(): array
+    private function getModulesData(): array
     {
-        $attributes = [];
+        $data = [];
 
         foreach ($this->getMissingModuleNames() as $moduleName) {
-            $attributes[] = [
-                'src' => sprintf(self::LOGO_URL_FORMAT, $moduleName),
-                'href' => sprintf(self::MODULE_URL_FORMAT, strtolower(str_replace('_', '-', $moduleName))),
-            ];
+            $packageName = strtolower(str_replace('_', '-', $moduleName));
+            $moduleUrl = sprintf(self::MODULE_URL_FORMAT, $packageName);
+            $logoUrl = sprintf(self::LOGO_URL_FORMAT, $moduleName);
+            $data[] = [self::MODULE_URL => $moduleUrl, self::LOGO_URL => $logoUrl];
         }
 
-        return $attributes;
+        return $data;
     }
 }

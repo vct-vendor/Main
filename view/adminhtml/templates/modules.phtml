@@ -6,14 +6,16 @@ declare(strict_types=1);
 
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
+use Vct\Main\Block\Adminhtml\System\Config\Modules;
 
 /** @var Escaper $escaper */
 /** @var Template $block */
+$modulesData = $block->getData(Modules::MODULES_DATA);
 ?>
 <div class="vct-modules">
-    <?php foreach ($block->getData('logo_attributes') as $logo): ?>
-        <a href="<?= $escaper->escapeUrl($logo['href']) ?>" target="_blank">
-            <img src="<?= $escaper->escapeHtmlAttr($logo['src']) ?>" />
+    <?php foreach ($modulesData as $moduleData): ?>
+        <a href="<?= $escaper->escapeUrl($moduleData[Modules::MODULE_URL]) ?>" target="_blank">
+            <img src="<?= $escaper->escapeUrl($moduleData[Modules::LOGO_URL]) ?>" alt="" />
         </a>
     <?php endforeach ?>
 </div>
